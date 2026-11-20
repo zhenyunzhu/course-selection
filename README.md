@@ -163,9 +163,12 @@ docker compose ps
 - **`-XX:MaxRAMPercentage=70`** —— JVM 跟随容器内存限制，而不是读宿主机的
 - **healthcheck + `depends_on: condition`** —— MySQL 就绪后才起业务服务，避免启动即报错
 
-> 说明：本机 Kafka 是用静态二进制跑的（CentOS 7 的 yum 源已失效），
-> `bitnami/kafka` 容器镜像在受限网络下未能拉取，compose 里已写好配置，
-> 用 `docker-compose.override.yml` 可临时关闭 MQ 只验证其余五个容器。
+> **Kafka 为什么不在 compose 里？**
+> 因为中间件是基础设施，生命周期和应用不同：应用发版要滚动重启，Kafka 不能跟着重启；
+> 多实例还要共享同一个集群。所以 Kafka 独立部署，容器通过宿主机地址访问
+> （`SPRING_KAFKA_BOOTSTRAP_SERVERS=192.168.91.1:9092`，并设置 `advertised.listeners`）。
+>
+> 实测链路：容器内消费组成功分配 3 个分区 → 选课触发 `[MQ] 已投递` → 消费者 `[MQ] 发送选课通知`。
 
 ---
 
@@ -184,6 +187,7 @@ docker compose ps
 | 预占超时未确认 | ✅ 对账扫描 → CAS 0→3 → 容量回补 |
 | 手动造墓碑 + 后到 Try | ✅ 返回已取消，不扣容量 |
 | **Docker Compose 部署** | ✅ 五容器启动，从宿主机调 `192.168.91.128:8088` 完成登录/查课/选课 |
+| **容器内 MQ 链路** | ✅ 消费组分配 3 分区 → 选课投递 → 消费者处理；退课容量 47→48 |
 
 ---
 
