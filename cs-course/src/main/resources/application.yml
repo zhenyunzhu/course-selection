@@ -1,0 +1,40 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: cs-course
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/cs_course?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: "123456"
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 3000
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      timeout: 3s
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+
+# 预占有效期（秒）：超过这个时间仍未 confirm，由对账任务释放
+cs:
+  reserve:
+    ttl-seconds: 120
+    # 幂等窗口：同一个 reserveId 重复 Try 直接返回已有结果
+  capacity:
+    release-batch: 200
+
+logging:
+  level:
+    com.cs: info

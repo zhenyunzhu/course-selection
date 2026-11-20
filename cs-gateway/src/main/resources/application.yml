@@ -1,0 +1,37 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: cs-gateway
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            cs-enroll:
+              - uri: http://127.0.0.1:8082
+            cs-course:
+              - uri: http://127.0.0.1:8081
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: enroll
+              uri: lb://cs-enroll
+              predicates:
+                - Path=/api/enrollments/**,/api/auth/**
+            - id: course
+              uri: lb://cs-course
+              predicates:
+                - Path=/api/courses/**
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Origin
+
+logging:
+  level:
+    org.springframework.cloud.gateway: info

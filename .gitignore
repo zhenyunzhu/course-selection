@@ -1,0 +1,22 @@
+# build
+target/
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# logs
+logs/
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
+
+# local
+application-local.yml

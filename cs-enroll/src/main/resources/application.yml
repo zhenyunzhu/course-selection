@@ -1,0 +1,55 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: cs-enroll
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/cs_enroll?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: "123456"
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 3000
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      timeout: 3s
+  cloud:
+    discovery:
+      client:
+        simple:
+          # 本地不装 Nacos 也能跑：用静态服务列表代替注册中心。
+          # 要接 Nacos 时删掉这一段，换成 spring-cloud-starter-alibaba-nacos-discovery + nacos 地址即可。
+          instances:
+            cs-course:
+              - uri: http://127.0.0.1:8081
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+
+# Feign：超时必须配，否则线程会被拖死
+spring.cloud.openfeign:
+  client:
+    config:
+      default:
+        connectTimeout: 1000
+        readTimeout: 3000
+        loggerLevel: basic
+
+cs:
+  enroll:
+    credit-limit: 30
+    term: "2026-2027-1"
+
+logging:
+  level:
+    com.cs: info
