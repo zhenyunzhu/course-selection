@@ -41,6 +41,9 @@ mvn -DskipTests package
 java -jar cs-course/target/cs-course-1.0.0.jar
 java -jar cs-enroll/target/cs-enroll-1.0.0.jar
 java -jar cs-gateway/target/cs-gateway-1.0.0.jar
+
+# 3.5 可选：起 Kafka（用 MQ 模式时）
+.\kafka-start.ps1
 ```
 
 验证：
@@ -97,5 +100,6 @@ course-selection/
 | 不引入 Seata，手写预占/确认/取消 | 想清楚补偿逻辑本身，且不锁全局行 | 要自己处理悬挂、空回滚 |
 | 容量用条件更新扣减 | 判断和修改在一条 SQL 里，无窗口 | 热点行会成为瓶颈（可上 Redis 预扣） |
 | 退课走「本地事务 + Outbox 补偿」 | 先保证用户操作成功，远程失败可重试 | 有一小段时间容量未回补 |
+| Outbox 之上再叠 Kafka | Outbox 管不丢，Kafka 管解耦与多消费方 | 多一套中间件要运维；可用 `cs.mq.enabled=false` 降级 |
 | 规则校验放在 enroll 侧 | 规则要读选课表，放 course 会双向依赖 | enroll 要多存几个快照字段 |
 | 本地用 static discovery 代替 Nacos | 不装注册中心也能跑 | 换机器要改配置（生产用 Nacos） |

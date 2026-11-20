@@ -1,4 +1,4 @@
-# 启动三个服务（Windows PowerShell）
+﻿# 启动三个服务（Windows PowerShell）
 # 用法：右键「使用 PowerShell 运行」，或在窗口里执行 .\start.ps1
 
 $ErrorActionPreference = "Stop"

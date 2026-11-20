@@ -26,6 +26,21 @@ spring:
           instances:
             cs-course:
               - uri: http://127.0.0.1:8081
+  kafka:
+    bootstrap-servers: 127.0.0.1:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all            # 等所有 ISR 确认，不丢
+      retries: 3
+    consumer:
+      group-id: cs-enroll-worker
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: manual_immediate
 
 mybatis-plus:
   configuration:
@@ -49,6 +64,11 @@ cs:
   enroll:
     credit-limit: 30
     term: "2026-2027-1"
+  mq:
+    # true：Outbox → Kafka → 消费者（生产形态）
+    # false：Outbox 中继直接调下游（没装 Kafka 时的降级通道）
+    enabled: true
+    topic: cs-enroll-events
 
 logging:
   level:
