@@ -1,0 +1,14 @@
+# 容器内配置：网关到两个服务的路由目标
+spring:
+  data:
+    redis:
+      host: redis
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            cs-enroll:
+              - uri: http://cs-enroll:8082
+            cs-course:
+              - uri: http://cs-course:8081

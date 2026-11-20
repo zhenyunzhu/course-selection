@@ -136,6 +136,39 @@ curl -X POST http://localhost:8088/api/auth/login -H "Content-Type: application/
 
 ---
 
+## 容器化部署
+
+```bash
+mvn -DskipTests package          # 先构建 jar（镜像只负责运行）
+docker compose up -d --build     # MySQL + Redis + Kafka + 三个服务
+docker compose ps
+```
+
+**实测结果**（CentOS 7 虚拟机，2C 3.7G）：
+
+| 容器 | 镜像 | 状态 | 端口 | 内存 |
+|---|---|---|---|---|
+| cs-mysql | mysql:8.0 | healthy | 3307→3306 | 342 MB |
+| cs-redis | redis:7-alpine | healthy | 6379 | 15 MB |
+| cs-course | course-selection-cs-course | Up | 8081 | 236 MB |
+| cs-enroll | course-selection-cs-enroll | Up | 8082 | 249 MB |
+| cs-gateway | course-selection-cs-gateway | Up | 8088 | 199 MB |
+
+**五个容器合计约 1 GB**，一条 `docker compose up -d` 拉起全套，容器内通过服务名互访（`mysql:3306`、`kafka:9092`、`http://cs-course:8081`），宿主机只需访问 `localhost:8088`。
+
+镜像设计：
+
+- **jar 在宿主机构建，镜像只负责运行** —— 构建工具链不进生产镜像
+- **非 root 用户运行** —— 容器逃逸时降低影响面
+- **`-XX:MaxRAMPercentage=70`** —— JVM 跟随容器内存限制，而不是读宿主机的
+- **healthcheck + `depends_on: condition`** —— MySQL 就绪后才起业务服务，避免启动即报错
+
+> 说明：本机 Kafka 是用静态二进制跑的（CentOS 7 的 yum 源已失效），
+> `bitnami/kafka` 容器镜像在受限网络下未能拉取，compose 里已写好配置，
+> 用 `docker-compose.override.yml` 可临时关闭 MQ 只验证其余五个容器。
+
+---
+
 ## 验证过的场景
 
 | 场景 | 结果 |
@@ -150,6 +183,7 @@ curl -X POST http://localhost:8088/api/auth/login -H "Content-Type: application/
 | **停掉 course 服务后退课** | ✅ 快速通道失败 → 中继投 Kafka → 消费失败重试 → 服务恢复后补做释放 |
 | 预占超时未确认 | ✅ 对账扫描 → CAS 0→3 → 容量回补 |
 | 手动造墓碑 + 后到 Try | ✅ 返回已取消，不扣容量 |
+| **Docker Compose 部署** | ✅ 五容器启动，从宿主机调 `192.168.91.128:8088` 完成登录/查课/选课 |
 
 ---
 

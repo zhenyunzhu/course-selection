@@ -1,0 +1,6 @@
+# 临时覆盖：Kafka 镜像过大，先验证「3 服务 + MySQL + Redis」的容器化
+# 明天拉到 bitnami/kafka 后删掉本文件，即可恢复完整编排
+services:
+  cs-enroll:
+    environment:
+      CS_MQ_ENABLED: "false"
