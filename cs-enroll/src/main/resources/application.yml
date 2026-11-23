@@ -36,11 +36,11 @@ spring:
     consumer:
       group-id: cs-enroll-worker
       auto-offset-reset: earliest
-      enable-auto-commit: false
+      enable-auto-commit: false #不自动提交位点
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     listener:
-      ack-mode: manual_immediate
+      ack-mode: manual_immediate #手动ack
 
 mybatis-plus:
   configuration:
